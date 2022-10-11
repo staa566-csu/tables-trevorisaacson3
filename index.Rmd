@@ -12,6 +12,12 @@ library(kableExtra)
 library(dplyr)
 ```
 
+For this assingment, I used college football data for the current 2022 season.  https://www.sports-reference.com/cfb/years/2022-team-offense.html
+
+
+
+
+
 ```{r message=FALSE}
 data = readxl::read_excel("CurrentOffense.xlsx")
 data = data[-c(1), ]

@@ -1,0 +1,91 @@
+---
+title: "index"
+author: "Trevor Isaacson"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+```
+
+For this assignment, I used college football data for the current 2022 season.  The data can be found at https://www.sports-reference.com/cfb/years/2022-team-offense.html.  It includes offensive averages for every NCAA football team including general totals, passing and rushing averages and data involving penalties and turnovers.        
+    
+```{r message=FALSE}
+data = readxl::read_excel("CurrentOffense.xlsx")
+data = data[-c(1), ]
+data = data %>% 
+  mutate_at(c(3:25), as.numeric) %>%
+  mutate_at(c(1), as.numeric)
+colnames(data) = c("Rank", "School", "Games", "Off_Points", "Off_Passing_Comp", "Off_Passing_Att", "Off_Passing_Pct", "Off_Passing_Yards", "Off_Passing_TD", "Off_Rushing_Att", "Off_Rushing_Yards", "Off_Rushing_Avg", "Off_Rushing_TD", "Off_Total_Plays", "Off_Total_Yards", "Off_Total_Avg", "Off_FirstDowns_Pass", "Off_FirstDowns_Rush", "Off_FirstDowns_Pens", "Off_FirstDowns_Total", "Off_Penalties", "Off_Penalty_Yards", "Off_Fumble", "Off_Int", "Off_Turnovers")
+
+head(data)
+```
+
+
+```{r message=FALSE}
+tbl = data %>%
+  kbl(col.names = c("Rank", "School", "Games", "Points", 
+                    "Comp", "Att", "Perc (%)", 
+                    "Yards", "TDs", "Att", "Yards", "Avg", 
+                    "TDs", "Plays", "Yards", "Avg", "Pass", "Rush", 
+                    "Penalties", "Total", "Penalties", "Yards", "Fumble", "Int", 
+                    "Turnovers"),
+      digits = 2,
+      caption = 'Offensive Averages Per Game',) %>%
+  add_header_above(c(" " = 4, "Passing" = 5, "Rushing" = 4, "Total" = 3,
+                     "First Downs" = 4, "Penalties" = 2, "Turnovers" =3)) %>%
+  kable_styling(font_size = 15) %>%
+  kable_paper(lightable_options = "hover", full_width = FALSE) %>%
+  scroll_box(width = "100%", height = "800px")
+
+tbl
+```
+
+This first table is meant to show all the data provided in the file in a way that is easy to read and understand.  I added the above headers to seperate each variable into a more general topic.  I also used the scroll box to help see each row with column headers and the hover effect with the paper styling.        
+
+```{r}
+q_yards = quantile(data$Off_Passing_Yards)
+data$yards_c <- ifelse(
+  data$Off_Passing_Yards >= as.numeric(q_yards[4]),
+  cell_spec(round(data$Off_Passing_Yards, 1), color = "green", bold = TRUE,
+            tooltip = paste("Yards from average: ", round(data$Off_Passing_Yards - q_yards[3], 2))),
+  cell_spec(round(data$Off_Passing_Yards, 1), 
+            tooltip = paste("Yards from average: ", round(data$Off_Passing_Yards - q_yards[3], 2)))
+)
+
+q_tds = quantile(data$Off_Passing_TD)
+data$tds_c <- ifelse(
+  data$Off_Passing_TD >= as.numeric(q_tds[4]),
+  cell_spec(round(data$Off_Passing_TD, 2), color = "green", bold = TRUE,
+            tooltip = paste("TD from average: ", round(data$Off_Passing_TD - q_tds[3], 2))),
+  cell_spec(round(data$Off_Passing_TD, 2), 
+            tooltip = paste("TD from average: ", round(data$Off_Passing_TD - q_tds[3], 2)))
+)
+```
+
+
+```{r}
+passingTbl = data %>%
+  select(Rank, School, Off_Points, Off_Passing_Comp, Off_Passing_Att,
+         Off_Passing_Pct, yards_c, tds_c) %>%
+  kbl(escape = FALSE,
+      col.names = c("Rank", "School", "Points", 
+                    "Completions", "Attempts", "Percentage", 
+                    "Yards", "Touchdowns"),
+      digits = 2,
+      caption = 'Passing Averages Per Game') %>%
+  kable_styling(font_size = 15) %>%
+  kable_paper(lightable_options = "hover", full_width = FALSE) %>%
+  scroll_box(width = "100%", height = "800px")
+
+passingTbl
+```
+
+This second table only shows the passing averages for each team per game.  It has the same functionality and formatting as above.  However, I added color highlights using cell_spec() to show the teams that are in the top 75% quantile of either passing yards or passing touchdowns.  I also added the tooltip function to the same columns which show hwo far each data point is from the mean.  I think this helps show the overall quality of each team.  
+
+
+

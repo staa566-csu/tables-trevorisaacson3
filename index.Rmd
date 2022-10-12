@@ -12,12 +12,8 @@ library(kableExtra)
 library(dplyr)
 ```
 
-For this assingment, I used college football data for the current 2022 season.  https://www.sports-reference.com/cfb/years/2022-team-offense.html
-
-
-
-
-
+For this assignment, I used college football data for the current 2022 season.  The data can be found at https://www.sports-reference.com/cfb/years/2022-team-offense.html.  It includes offensive averages for every NCAA football team including general totals, passing and rushing averages and data involving penalties and turnovers.        
+    
 ```{r message=FALSE}
 data = readxl::read_excel("CurrentOffense.xlsx")
 data = data[-c(1), ]
@@ -48,6 +44,8 @@ tbl = data %>%
 
 tbl
 ```
+
+This first table is meant to show all the data provided in the file in a way that is easy to read and understand.  I added the above headers to seperate each variable into a more general topic.  I also used the scroll box to help see each row with column headers and the hover effect with the paper styling.        
 
 ```{r}
 q_yards = quantile(data$Off_Passing_Yards)
@@ -86,4 +84,8 @@ passingTbl = data %>%
 
 passingTbl
 ```
+
+This second table only shows the passing averages for each team per game.  It has the same functionality and formatting as above.  However, I added color highlights using cell_spec() to show the teams that are in the top 75% quantile of either passing yards or passing touchdowns.  I also added the tooltip function to the same columns which show hwo far each data point is from the mean.  I think this helps show the overall quality of each team.  
+
+
 
